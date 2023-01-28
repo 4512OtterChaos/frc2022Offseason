@@ -1,0 +1,106 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot;
+
+import com.revrobotics.REVPhysicsSim;
+
+import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
+import edu.wpi.first.wpilibj.simulation.BatterySim;
+import edu.wpi.first.wpilibj.simulation.RoboRioSim;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+
+public class Robot extends TimedRobot {
+
+    private RobotContainer container;
+
+    private Command autoCommand;
+
+    private Timer disableTimer = new Timer();
+
+    @Override
+    public void robotInit() {
+        container = new RobotContainer();
+
+        LiveWindow.disableAllTelemetry();
+        LiveWindow.setEnabled(false);
+    }
+    
+    @Override
+    public void robotPeriodic() {
+        CommandScheduler.getInstance().run();
+        
+        container.periodic();
+        container.log();
+    }
+    
+    @Override
+    public void autonomousInit() {
+        container.setAllBrake(true);
+
+        autoCommand = container.getAutoCommand();
+
+        if(autoCommand != null){
+            autoCommand.schedule();
+        }
+    }
+    
+    @Override
+    public void autonomousPeriodic() {}
+    
+    @Override
+    public void teleopInit() {
+        container.setAllBrake(true);
+        container.init(false);
+
+        if(autoCommand != null){
+            autoCommand.cancel();
+        }
+    }
+    
+    @Override
+    public void teleopPeriodic() {}
+    
+    @Override
+    public void disabledInit() {
+        disableTimer.reset();
+        disableTimer.start();
+        
+        container.disable();
+    }
+    
+    @Override
+    public void disabledPeriodic() {
+        // coast motors in disabled mode so the robot can be moved
+        if(disableTimer.hasElapsed(2)){
+            disableTimer.stop();
+            disableTimer.reset();
+
+            container.setAllBrake(false);
+        }
+    }
+
+    @Override
+    public void simulationInit(){
+        container.simulationInit();
+    }
+    @Override
+    public void simulationPeriodic(){
+        container.simulationPeriodic();
+        // calculate voltage sag due to current draw
+        RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(container.getCurrentDraw()));
+    }
+    
+    @Override
+    public void testInit() {
+        container.setAllBrake(true);
+        container.init(true);
+    }
+    
+    @Override
+    public void testPeriodic() {}
+}
