@@ -76,7 +76,7 @@
       "/SmartDashboard/Field": {
         "Cargo": {
           "arrows": false,
-          "image": "C:\\Users\\nolee\\Documents\\GitHub\\frc2022\\cargo.png",
+          "image": "cargo.png",
           "length": 0.24383999407291412,
           "selectable": false,
           "width": 0.24383999407291412
@@ -94,7 +94,7 @@
         },
         "Swerve Modules": {
           "arrows": false,
-          "image": "C:\\Users\\nolee\\Documents\\GitHub\\frc2022\\swerve_module.png",
+          "image": "swerve_module.png",
           "length": 0.24383999407291412,
           "selectable": false,
           "width": 0.24383999407291412
@@ -105,7 +105,7 @@
           "style": "Track"
         },
         "Turret": {
-          "image": "C:\\Users\\nolee\\Documents\\GitHub\\frc2022\\swerve_module.png",
+          "image": "swerve_module.png",
           "length": 0.30480000376701355,
           "width": 0.30480000376701355
         },
@@ -115,7 +115,7 @@
         },
         "bottom": 900,
         "height": 8.229599952697754,
-        "image": "C:\\Users\\nolee\\Documents\\GitHub\\frc2022\\2022-field.png",
+        "image": "2022-field.png",
         "left": 74,
         "right": 1774,
         "top": 50,
@@ -133,7 +133,7 @@
       "/SmartDashboard/Field XZ": {
         "Cargo": {
           "arrows": false,
-          "image": "C:\\Users\\nolee\\Documents\\GitHub\\frc2022\\cargo.png",
+          "image": "cargo.png",
           "length": 0.24383999407291412,
           "selectable": false,
           "width": 0.24383999407291412
@@ -156,7 +156,7 @@
         },
         "bottom": 1195,
         "height": 2.6398727893829346,
-        "image": "C:\\Users\\nolee\\Documents\\GitHub\\frc2022\\2022-fieldXZ.png",
+        "image": "2022-fieldXZ.png",
         "right": 3677,
         "top": 600,
         "units": "feet",
@@ -216,7 +216,7 @@
               "autoFit": true
             }
           ],
-          "height": -46,
+          "height": 0,
           "series": [
             {
               "color": [
@@ -231,7 +231,8 @@
         }
       ],
       "window": {
-        "name": "Indexer"
+        "name": "Indexer",
+        "visible": false
       }
     },
     "Plot <1>": {
@@ -242,7 +243,7 @@
               "autoFit": true
             }
           ],
-          "height": -35,
+          "height": 2,
           "name": "VX",
           "series": [
             {
@@ -271,7 +272,7 @@
               "autoFit": true
             }
           ],
-          "height": -35,
+          "height": 2,
           "name": "VY",
           "series": [
             {
@@ -300,7 +301,7 @@
               "autoFit": true
             }
           ],
-          "height": -35,
+          "height": 2,
           "name": "Omega",
           "series": [
             {
@@ -325,7 +326,8 @@
         }
       ],
       "window": {
-        "name": "Drivetrain"
+        "name": "Drivetrain",
+        "visible": false
       }
     },
     "Plot <2>": {
@@ -336,7 +338,7 @@
               "autoFit": true
             }
           ],
-          "height": -46,
+          "height": 0,
           "series": [
             {
               "color": [
@@ -360,7 +362,8 @@
         }
       ],
       "window": {
-        "name": "Shooter"
+        "name": "Shooter",
+        "visible": false
       }
     },
     "Plot <3>": {
@@ -371,7 +374,7 @@
               "autoFit": true
             }
           ],
-          "height": 304,
+          "height": 0,
           "series": [
             {
               "color": [
@@ -393,7 +396,10 @@
             }
           ]
         }
-      ]
+      ],
+      "window": {
+        "visible": false
+      }
     },
     "Plot <4>": {
       "plots": [
@@ -403,7 +409,7 @@
               "autoFit": true
             }
           ],
-          "height": -46,
+          "height": 0,
           "series": [
             {
               "color": [
@@ -425,7 +431,10 @@
             }
           ]
         }
-      ]
+      ],
+      "window": {
+        "visible": false
+      }
     },
     "Plot <5>": {
       "plots": [
@@ -436,7 +445,7 @@
               "autoFit": true
             }
           ],
-          "height": -38,
+          "height": 2,
           "series": [
             {
               "color": [
@@ -464,7 +473,7 @@
               "autoFit": true
             }
           ],
-          "height": -38,
+          "height": 2,
           "series": [
             {
               "color": [
@@ -495,7 +504,10 @@
             }
           ]
         }
-      ]
+      ],
+      "window": {
+        "visible": false
+      }
     }
   }
 }
