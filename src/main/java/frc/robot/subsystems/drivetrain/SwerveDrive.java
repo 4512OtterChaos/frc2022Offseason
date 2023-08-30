@@ -256,10 +256,10 @@ public class SwerveDrive extends SubsystemBase implements Loggable {
      */
     public SwerveModuleState[] getModuleStates(){
         return new SwerveModuleState[]{
-            swerveMods[0].getAbsoluteState(),
-            swerveMods[1].getAbsoluteState(),
-            swerveMods[2].getAbsoluteState(),
-            swerveMods[3].getAbsoluteState()
+            swerveMods[0].getIntegratedState(),
+            swerveMods[1].getIntegratedState(),
+            swerveMods[2].getIntegratedState(),
+            swerveMods[3].getIntegratedState()
         };
     }
     public SwerveModulePosition[] getModulePositions(){
@@ -277,7 +277,7 @@ public class SwerveDrive extends SubsystemBase implements Loggable {
         Pose2d[] modulePoses = new Pose2d[4];
         for(int i=0;i<4;i++){
             SwerveModule module = swerveMods[i];
-            modulePoses[i] = getPose().transformBy(new Transform2d(module.getModuleConstants().centerOffset, module.getAbsoluteHeading()));
+            modulePoses[i] = getPose().transformBy(new Transform2d(module.getModuleConstants().centerOffset, module.getIntegratedHeading()));
         }
         return modulePoses;
     }
@@ -342,5 +342,17 @@ public class SwerveDrive extends SubsystemBase implements Loggable {
         double sum = 0;
         for(SwerveModule module : swerveMods) sum += module.getDriveCurrentDraw() + module.getSteerCurrentDraw();
         return sum;
+    }
+    /**
+     * Resets the modules steer encoders to 0 and the odometry turn to 0.
+     */
+    public void resetMotorEncoders(){
+       for(SwerveModule module : swerveMods) module.resetMotorEncoder();
+       resetOdometry(
+            new Pose2d(
+                getPose().getTranslation(),
+                new Rotation2d()
+            )
+        );
     }
 }

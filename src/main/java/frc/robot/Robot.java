@@ -42,7 +42,7 @@ public class Robot extends TimedRobot {
     public void autonomousInit() {
         container.setAllBrake(true);
 
-        autoCommand = container.getAutoCommand();
+        // autoCommand = container.getAutoCommand();
 
         if(autoCommand != null){
             autoCommand.schedule();
@@ -90,7 +90,7 @@ public class Robot extends TimedRobot {
     }
     @Override
     public void simulationPeriodic(){
-        container.simulationPeriodic();
+        // container.simulationPeriodic();
         // calculate voltage sag due to current draw
         RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(container.getCurrentDraw()));
     }

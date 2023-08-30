@@ -38,14 +38,14 @@ public class SwerveModule implements Loggable {
     // Hardware
     private final WPI_TalonFX driveMotor;
     private final WPI_TalonFX steerMotor;
-    private final WPI_CANCoder steerEncoder;
+    // private final WPI_CANCoder steerEncoder;
 
     public SwerveModule(Module moduleConstants){
         this.moduleConstants = moduleConstants;
 
         driveMotor = new WPI_TalonFX(moduleConstants.driveMotorID);
         steerMotor = new WPI_TalonFX(moduleConstants.steerMotorID);
-        steerEncoder = new WPI_CANCoder(moduleConstants.cancoderID);
+        // steerEncoder = new WPI_CANCoder(moduleConstants.cancoderID);
 
         setupDriveMotor(true);
         setupCancoder(true);
@@ -54,7 +54,7 @@ public class SwerveModule implements Loggable {
         // Simulation
         driveMotorSim = driveMotor.getSimCollection();
         steerMotorSim = steerMotor.getSimCollection();
-        steerEncoderSim = steerEncoder.getSimCollection();
+        // steerEncoderSim = steerEncoder.getSimCollection();
     }
 
     private void setupDriveMotor(boolean init){
@@ -68,8 +68,8 @@ public class SwerveModule implements Loggable {
         if(Robot.isSimulation()) TalonUtil.configStatusSim(driveMotor);
     }
     private void setupCancoder(boolean init){
-        steerEncoder.configAllSettings(cancoderConfig);
-        steerEncoder.configMagnetOffset(moduleConstants.angleOffset, 50);
+        // steerEncoder.configAllSettings(cancoderConfig);
+        // steerEncoder.configMagnetOffset(moduleConstants.angleOffset, 50);
     }
     private void setupSteerMotor(boolean init){
         if(init){
@@ -77,7 +77,7 @@ public class SwerveModule implements Loggable {
         }
         steerMotor.enableVoltageCompensation(true);
         steerMotor.setInverted(kInvertSteer);
-        resetToAbsolute();
+        // resetToAbsolute();
         TalonUtil.configStatusSolo(steerMotor);
         if(Robot.isSimulation()) TalonUtil.configStatusSim(steerMotor);
     }
@@ -96,10 +96,10 @@ public class SwerveModule implements Loggable {
      * Reset the steering motor integrated encoder to the position of the steering cancoder.
      * We want to use the integrated encoder for control, but need the absolute cancoder for determining our startup rotation.
      */
-    public void resetToAbsolute(){
-        double absolutePosition = TalonUtil.degreesToPosition(getAbsoluteHeading().getDegrees(), kSteerGearRatio);
-        steerMotor.setSelectedSensorPosition(absolutePosition);
-    }
+    // public void resetToAbsolute(){
+    //     double absolutePosition = TalonUtil.degreesToPosition(getAbsoluteHeading().getDegrees(), kSteerGearRatio);
+    //     steerMotor.setSelectedSensorPosition(absolutePosition);
+    // }
 
     /**
      * Command this swerve module to the desired angle and velocity.
@@ -169,12 +169,12 @@ public class SwerveModule implements Loggable {
     public Rotation2d getIntegratedHeading(){
         return Rotation2d.fromDegrees(TalonUtil.positionToDegrees(steerMotor.getSelectedSensorPosition(), kSteerGearRatio));
     }
-    /**
-     * Module heading reported by steering cancoder
-     */
-    public Rotation2d getAbsoluteHeading(){
-        return Rotation2d.fromDegrees(steerEncoder.getPosition()).plus(new Rotation2d());
-    }
+    // /**
+    //  * Module heading reported by steering cancoder
+    //  */
+    // public Rotation2d getAbsoluteHeading(){
+    //     return Rotation2d.fromDegrees(steerEncoder.getPosition()).plus(new Rotation2d());
+    // }
 
     /**
      * @return State describing integrated module rotation and velocity in meters per second
@@ -190,14 +190,14 @@ public class SwerveModule implements Loggable {
     /**
      * @return State describing absolute module rotation and velocity in meters per second
      */
-    public SwerveModuleState getAbsoluteState(){
-        double velocity = TalonUtil.velocityToMeters(
-            driveMotor.getSelectedSensorVelocity(),
-            kDriveGearRatio, kWheelCircumference
-        );
-        Rotation2d angle = getAbsoluteHeading();
-        return new SwerveModuleState(velocity, angle);
-    }
+    // public SwerveModuleState getAbsoluteState(){
+    //     double velocity = TalonUtil.velocityToMeters(
+    //         driveMotor.getSelectedSensorVelocity(),
+    //         kDriveGearRatio, kWheelCircumference
+    //     );
+    //     Rotation2d angle = getAbsoluteHeading();
+    //     return new SwerveModuleState(velocity, angle);
+    // }
 
     public void resetPosition(){
         driveMotor.setSelectedSensorPosition(0);
@@ -205,7 +205,7 @@ public class SwerveModule implements Loggable {
     public SwerveModulePosition getPosition() {
         return new SwerveModulePosition(
             TalonUtil.positionToMeters(driveMotor.getSelectedSensorPosition(), kDriveGearRatio, kWheelCircumference),
-            getAbsoluteHeading()
+            getIntegratedHeading()
         );
     }
 
@@ -285,15 +285,15 @@ public class SwerveModule implements Loggable {
     }
 
     public void log(){
-        SwerveModuleState state = getAbsoluteState();
+        // SwerveModuleState state = getAbsoluteState();
         int num = moduleConstants.moduleNum;
         //SmartDashboard.putNumber("Module "+num+" Cancoder Degrees", getCancoderHeading().getDegrees());
-        SmartDashboard.putNumber("Module "+num+"/Steer Degrees", state.angle.getDegrees());
+        // SmartDashboard.putNumber("Module "+num+"/Steer Degrees", state.angle.getDegrees());
         SmartDashboard.putNumber("Module "+num+"/Steer Target Degrees", lastDesiredState.angle.getDegrees());
         SmartDashboard.putNumber("Module "+num+"/Steer Native", steerMotor.getSelectedSensorPosition());
         SmartDashboard.putNumber("Module "+num+"/Steer Target Native", steerMotor.getClosedLoopTarget());
         SmartDashboard.putNumber("Module "+num+"/Steer Velocity Native", steerMotor.getSelectedSensorVelocity());
-        SmartDashboard.putNumber("Module "+num+"/Drive Velocity Feet", Units.metersToFeet(state.speedMetersPerSecond));
+        // SmartDashboard.putNumber("Module "+num+"/Drive Velocity Feet", Units.metersToFeet(state.speedMetersPerSecond));
         SmartDashboard.putNumber("Module "+num+"/Drive Velocity Target Feet", Units.metersToFeet(lastDesiredState.speedMetersPerSecond));
     }
 
@@ -314,7 +314,7 @@ public class SwerveModule implements Loggable {
         DCMotor.getFalcon500(1),
         kSteerGearRatio
     );
-    private final CANCoderSimCollection steerEncoderSim;
+    // private final CANCoderSimCollection steerEncoderSim;
 
     public void simulationPeriodic(){
         // apply our commanded voltage to our simulated physics mechanisms
@@ -345,12 +345,12 @@ public class SwerveModule implements Loggable {
         steerMotorSim.addIntegratedSensorPosition((int)(steerMotorPositionDeltaNative));
         steerMotorSim.setSupplyCurrent(steeringSim.getCurrentDrawAmps()/2);
         
-        steerEncoderSim.setVelocity((int)(TalonUtil.rotationsToVelocity(steeringSim.getAngularVelocityRPM()/60, 1)*2));
-        steerEncoderSim.setRawPosition((int)(getIntegratedHeading().getDegrees()/360.0*4096));
+        // steerEncoderSim.setVelocity((int)(TalonUtil.rotationsToVelocity(steeringSim.getAngularVelocityRPM()/60, 1)*2));
+        // steerEncoderSim.setRawPosition((int)(getIntegratedHeading().getDegrees()/360.0*4096));
 
         driveMotorSim.setBusVoltage(RobotController.getBatteryVoltage());
         steerMotorSim.setBusVoltage(RobotController.getBatteryVoltage());
-        steerEncoderSim.setBusVoltage(RobotController.getBatteryVoltage());
+        // steerEncoderSim.setBusVoltage(RobotController.getBatteryVoltage());
     }
 
     public double getDriveCurrentDraw(){
@@ -358,5 +358,10 @@ public class SwerveModule implements Loggable {
     }
     public double getSteerCurrentDraw(){
         return steerMotor.getSupplyCurrent();
+    }
+    public void resetMotorEncoder(){
+        steerMotor.setSelectedSensorPosition(0);
+        lastTargetTotalAngle = 0;
+        lastDesiredState = new SwerveModuleState();
     }
 }

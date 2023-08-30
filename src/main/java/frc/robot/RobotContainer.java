@@ -20,9 +20,9 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.auto.AutoOptions;
+// import frc.robot.auto.AutoOptions;
 import frc.robot.common.OCXboxController;
-import frc.robot.simulation.CargoSim;
+// import frc.robot.simulation.CargoSim;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.drivetrain.SwerveDrive;
 import frc.robot.subsystems.drivetrain.commands.TeleopDriveAngle;
@@ -42,21 +42,21 @@ public class RobotContainer {
     private final Indexer indexer = new Indexer();
     private final Intake intake = new Intake();
     private final Shooter shooter = new Shooter();
-    private final Vision vision = new Vision();
-    private final Superstructure superstructure = new Superstructure(drivetrain, indexer, intake, shooter, vision);
+    // private final Vision vision = new Vision();
+    private final Superstructure superstructure = new Superstructure(drivetrain, indexer, intake, shooter);
 
     private OCXboxController driver = new OCXboxController(0);
     private OCXboxController operator = new OCXboxController(1);
-    private final Compressor compressor = new Compressor(PneumaticsModuleType.CTREPCM);
+    // private final Compressor compressor = new Compressor(PneumaticsModuleType.CTREPCM);
 
-    private final AutoOptions autoOptions = new AutoOptions(drivetrain, indexer, intake, shooter, superstructure);
+    // private final AutoOptions autoOptions = new AutoOptions(drivetrain, indexer, intake, shooter, superstructure);
 
     private final Field2d field = new Field2d();
 
     public RobotContainer(){
         configureEventBinds();
 
-        autoOptions.submit();
+        // autoOptions.submit();
         SmartDashboard.putData("Field", field);
 
         LiveWindow.disableAllTelemetry();
@@ -65,6 +65,8 @@ public class RobotContainer {
         Logger.configureLogging(this);
         // uncomment this line for tuning mode
         Logger.configureConfig(this);
+        drivetrain.resetMotorEncoders();
+        SmartDashboard.putData("Reset Module Steering to 0", runOnce(()->{ drivetrain.resetMotorEncoders();}, drivetrain));
     }
 
     public void periodic(){
@@ -72,16 +74,16 @@ public class RobotContainer {
         ShotMap.setRPMOffset(SmartDashboard.getNumber("Shooter/RPM Offset", 0));
     }
 
-    public Command getAutoCommand(){
-        return autoOptions.getSelected();
-    }
+    // public Command getAutoCommand(){
+    //     return autoOptions.getSelected();
+    // }
 
     public void disable(){
         drivetrain.stop();
         intake.stop();
         indexer.stop();
         shooter.stop();
-        shooter.setHood(0);
+        // shooter.setHood(0);
     }
 
     public void init(boolean testMode) {
@@ -91,7 +93,7 @@ public class RobotContainer {
             operator = new OCXboxController(1);
             configureDriverBinds(driver);
             configureOperatorBinds(driver);
-            configureOperatorBinds(operator);
+            // configureOperatorBinds(operator);
         }
         else {
             driver = new OCXboxController(0);
@@ -108,7 +110,7 @@ public class RobotContainer {
 
     private void configureEventBinds() {
         // estimate hood angle continuously before shooting
-        shooter.setDefaultCommand(superstructure.autoHood());
+        // shooter.setDefaultCommand(superstructure.autoHood());
 
         // count intaken cargo, rumble controllers
         new Trigger(()->indexer.getBottomSensed())
@@ -122,7 +124,7 @@ public class RobotContainer {
         // when no other command is using the drivetrain, we
         // pass the joysticks for forward, strafe, and angular position control
         drivetrain.setDefaultCommand(new TeleopDriveBasic(controller, drivetrain));
-        //drivetrain.setDefaultCommand(new TeleopDriveAngle(controller, drivetrain));
+        // drivetrain.setDefaultCommand(new TeleopDriveAngle(controller, drivetrain));
 
         // push-to-change driving "speed"
         controller.rightBumper()
@@ -144,16 +146,7 @@ public class RobotContainer {
             );
         }));
 
-        // lock the modules in a "X" alignment
-        controller.x().whileTrue(run(()->{
-            SwerveModuleState[] states = new SwerveModuleState[]{
-                new SwerveModuleState(0, Rotation2d.fromDegrees(-135)),
-                new SwerveModuleState(0, Rotation2d.fromDegrees(135)),
-                new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),
-                new SwerveModuleState(0, Rotation2d.fromDegrees(45))
-            };
-            drivetrain.setModuleStates(states, false, true);
-        }, drivetrain));
+        
     }
     private void configureOperatorBinds(OCXboxController controller) {
 
@@ -181,7 +174,7 @@ public class RobotContainer {
                 )
             );
         
-        controller.b().onTrue(runOnce(()->intake.setExtended(false)));
+        // controller.b().onTrue(runOnce(()->intake.setExtended(false)));
 
         controller.y().onTrue(superstructure.fenderShootHigh())
         .onFalse(runOnce(()->{
@@ -196,20 +189,20 @@ public class RobotContainer {
         }, shooter, indexer));
 
         // auto shoot high hub with pose estimation
-        controller.leftTrigger(0.25).onTrue(
-            superstructure.autoShoot(
-                ()->driver.getForward() * drivetrain.getMaxLinearVelocityMeters(),
-                ()->driver.getStrafe() * drivetrain.getMaxLinearVelocityMeters(),
-                false
-            ).beforeStarting(()->controller.resetLimiters())
-        )
-        .onFalse(
-            superstructure.stopDrive()
-            .alongWith(
-                superstructure.stopIndexer(),
-                superstructure.stopShooter()
-            )
-        );
+        // controller.leftTrigger(0.25).onTrue(
+        //     superstructure.autoShoot(
+        //         ()->driver.getForward() * drivetrain.getMaxLinearVelocityMeters(),
+        //         ()->driver.getStrafe() * drivetrain.getMaxLinearVelocityMeters(),
+        //         false
+        //     ).beforeStarting(()->controller.resetLimiters())
+        // )
+        // .onFalse(
+        //     superstructure.stopDrive()
+        //     .alongWith(
+        //         superstructure.stopIndexer(),
+        //         superstructure.stopShooter()
+        //     )
+        // );
 
         // auto shoot high hub with only vision data
         /*
@@ -234,57 +227,57 @@ public class RobotContainer {
         );
         */
 
-        controller.leftBumper().onTrue(
-            new InstantCommand(controller::resetLimiters)
-            .andThen(new FunctionalCommand(
-                ()->{
-                    drivetrain.resetPathController();
-                    vision.resetFilter();
-                }, 
-                ()->{
-                    Translation2d target = vision.getFilteredRobotToTargetTranslation().plus(
-                        drivetrain.getPose(vision.getLatencySeconds())
-                            .orElse(drivetrain.getPose())
-                            .minus(drivetrain.getPose()).getTranslation()
-                    );
-                    boolean hasTarget = vision.getHasTarget();
-                    double dist = target.getNorm();
-                    Rotation2d targetAngle = new Rotation2d(target.getX(), target.getY())
-                        .plus(new Rotation2d(Math.PI))
-                        .plus(drivetrain.getHeading());
-                    Shooter.State targetShooterState = ShotMap.find(dist);
-                    shooter.setState(targetShooterState);
-                    //Drivetrain heading target to hub
-                    boolean driveAtGoal = drivetrain.drive(
-                        driver.getForward() * drivetrain.getMaxLinearVelocityMeters(),
-                        driver.getStrafe() * drivetrain.getMaxLinearVelocityMeters(),
-                        targetAngle,
-                        true
-                    );
-                    //Indexer feed when shooter && drivetrain ready
-                    if(driveAtGoal && shooter.withinTolerance() && hasTarget){
-                        indexer.setVoltageFeed();
-                    }
-                    else{
-                        indexer.stop();
-                    }
-                }, 
-                (interrupted)->{
-                    shooter.stop();
-                    indexer.stop();
-                    drivetrain.stop();
-                },
-                ()->false,
-                drivetrain, shooter, indexer
-            ))
-        )
-        .onFalse(
-            superstructure.stopDrive()
-            .alongWith(
-                superstructure.stopIndexer(),
-                superstructure.stopShooter()
-            )
-        );
+        // controller.leftBumper().onTrue(
+        //     new InstantCommand(controller::resetLimiters)
+        //     .andThen(new FunctionalCommand(
+        //         ()->{
+        //             drivetrain.resetPathController();
+        //             vision.resetFilter();
+        //         }, 
+        //         ()->{
+        //             Translation2d target = vision.getFilteredRobotToTargetTranslation().plus(
+        //                 drivetrain.getPose(vision.getLatencySeconds())
+        //                     .orElse(drivetrain.getPose())
+        //                     .minus(drivetrain.getPose()).getTranslation()
+        //             );
+        //             boolean hasTarget = vision.getHasTarget();
+        //             double dist = target.getNorm();
+        //             Rotation2d targetAngle = new Rotation2d(target.getX(), target.getY())
+        //                 .plus(new Rotation2d(Math.PI))
+        //                 .plus(drivetrain.getHeading());
+        //             Shooter.State targetShooterState = ShotMap.find(dist);
+        //             shooter.setState(targetShooterState);
+        //             //Drivetrain heading target to hub
+        //             boolean driveAtGoal = drivetrain.drive(
+        //                 driver.getForward() * drivetrain.getMaxLinearVelocityMeters(),
+        //                 driver.getStrafe() * drivetrain.getMaxLinearVelocityMeters(),
+        //                 targetAngle,
+        //                 true
+        //             );
+        //             //Indexer feed when shooter && drivetrain ready
+        //             if(driveAtGoal && shooter.withinTolerance() && hasTarget){
+        //                 indexer.setVoltageFeed();
+        //             }
+        //             else{
+        //                 indexer.stop();
+        //             }
+        //         }, 
+        //         (interrupted)->{
+        //             shooter.stop();
+        //             indexer.stop();
+        //             drivetrain.stop();
+        //         },
+        //         ()->false,
+        //         drivetrain, shooter, indexer
+        //     ))
+        // )
+        // .onFalse(
+        //     superstructure.stopDrive()
+        //     .alongWith(
+        //         superstructure.stopIndexer(),
+        //         superstructure.stopShooter()
+        //     )
+        // );
     }
 
     // Manual shot tuning
@@ -317,7 +310,7 @@ public class RobotContainer {
             }, intake, indexer));
 
         shooter.setDefaultCommand(new RunCommand(()->{
-            shooter.setHood(SmartDashboard.getNumber("Hood MM", 0));
+            // shooter.setHood(SmartDashboard.getNumber("Hood MM", 0));
             shooter.setRPM(SmartDashboard.getNumber("Shooter Rpm", 0));
 
             //shooter.setShooterVoltage(controller.getLeftTriggerAxis()*12);
@@ -343,19 +336,19 @@ public class RobotContainer {
         intake.log();
         indexer.log();
         shooter.log();
-        vision.log();
+        // vision.log();
         
-        SmartDashboard.putBoolean("Comp/Switch", compressor.getPressureSwitchValue());
+        // SmartDashboard.putBoolean("Comp/Switch", compressor.getPressureSwitchValue());
 
         field.setRobotPose(drivetrain.getPose());
-        field.getObject("vision pose").setPose(new Pose2d(
-            FieldUtil.kFieldCenter.minus(vision.getRobotToTargetTranslation().rotateBy(drivetrain.getHeading())),
-            new Rotation2d()
-        ));
+        // field.getObject("vision pose").setPose(new Pose2d(
+        //     FieldUtil.kFieldCenter.minus(vision.getRobotToTargetTranslation().rotateBy(drivetrain.getHeading())),
+        //     new Rotation2d()
+        // ));
         //field.getObject("Vision Target").setPose(drivetrain.getPose().transformBy(vision.getRobotToTarget(drivetrain.getHeading())));
-        field.getObject("Vision Target").setPose(drivetrain.getPose().plus(
-            new Transform2d(vision.getRobotToTargetTranslation(), new Rotation2d())
-        ));
+        // field.getObject("Vision Target").setPose(drivetrain.getPose().plus(
+        //     new Transform2d(vision.getRobotToTargetTranslation(), new Rotation2d())
+        // ));
         
         field.getObject("Swerve Modules").setPoses(drivetrain.getModulePoses());
         Trajectory logTrajectory = drivetrain.getLogTrajectory();
@@ -376,22 +369,22 @@ public class RobotContainer {
     //----- Simulation
 
     private final Field2d xzField = new Field2d();
-    private CargoSim cargoSimulation = new CargoSim(
-        drivetrain::getPose,
-        drivetrain::getChassisSpeeds,
-        intake::getRPM,
-        indexer::getRPM,
-        shooter::getState,
-        indexer::setBottomSimSensed,
-        indexer::setTopSimSensed,
-        field,
-        xzField
-    );
+    // private CargoSim cargoSimulation = new CargoSim(
+    //     drivetrain::getPose,
+    //     drivetrain::getChassisSpeeds,
+    //     intake::getRPM,
+    //     indexer::getRPM,
+    //     shooter::getState,
+    //     indexer::setBottomSimSensed,
+    //     indexer::setTopSimSensed,
+    //     field,
+    //     xzField
+    // );
     public void simulationInit(){
         SmartDashboard.putData("Field XZ", xzField);
     }
     public void simulationPeriodic(){
-        cargoSimulation.update();
+        // cargoSimulation.update();
     }
 
     public double getCurrentDraw(){

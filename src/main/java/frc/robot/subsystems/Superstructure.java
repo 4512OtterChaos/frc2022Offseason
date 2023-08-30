@@ -36,35 +36,35 @@ public class Superstructure {
     private final Indexer indexer;
     private final Intake intake;
     private final Shooter shooter;
-    private final Vision vision;
+    // private final Vision vision;
 
     private int cargoStored = 0;
 
-    public Superstructure(SwerveDrive drivetrain, Indexer indexer, Intake intake, Shooter shooter, Vision vision) {
+    public Superstructure(SwerveDrive drivetrain, Indexer indexer, Intake intake, Shooter shooter) {
         this.drivetrain = drivetrain;
         this.indexer = indexer;
         this.intake = intake;
         this.shooter = shooter;
-        this.vision = vision;
+        // this.vision = vision;
     }
     
     public void periodic() {
         // adjust odometry with vision data
         // without this, pose estimation is equivalent to normal odometry
         
-        Translation2d target = vision.getRobotToTargetTranslation();
-        boolean visionOnEdge = Math.abs(vision.getTargetYaw().getDegrees()) > 25;
-        if(vision.getHasTarget() && !visionOnEdge){
-            drivetrain.addVisionMeasurement(
-                new Pose2d(
-                    FieldUtil.kFieldCenter.minus(target.rotateBy(drivetrain.getHeading())),
-                    drivetrain.getPose(vision.getLatencySeconds())
-                        .orElse(drivetrain.getPose())
-                        .getRotation()
-                ),
-                vision.getLatencySeconds()
-            );
-        }
+        // Translation2d target = vision.getRobotToTargetTranslation();
+        // boolean visionOnEdge = Math.abs(vision.getTargetYaw().getDegrees()) > 25;
+        // if(vision.getHasTarget() && !visionOnEdge){
+        //     drivetrain.addVisionMeasurement(
+        //         new Pose2d(
+        //             FieldUtil.kFieldCenter.minus(target.rotateBy(drivetrain.getHeading())),
+        //             drivetrain.getPose(vision.getLatencySeconds())
+        //                 .orElse(drivetrain.getPose())
+        //                 .getRotation()
+        //         ),
+        //         vision.getLatencySeconds()
+        //     );
+        // }
         
     }
 
@@ -94,30 +94,18 @@ public class Superstructure {
      * This command must be interrupted and will stop intaking once interrupted.
      */
     public Command intakeCargo(){
-        return new InstantCommand(()->intake.setExtended(true), intake)
-        .andThen(new ConditionalCommand(
-            new InstantCommand(), 
-            new WaitCommand(0.3), 
-            intake::getExtended
-        ))
-        .andThen(new StartEndCommand(
+        return new StartEndCommand(
             ()->intake.setVoltageIn(), 
             ()->intake.stop(),
             intake
-        ));
+        );
     }
     public Command intakeCargo(DoubleSupplier linearVelocity){
-        return new InstantCommand(()->intake.setExtended(true), intake)
-        .andThen(new ConditionalCommand(
-            new InstantCommand(), 
-            new WaitCommand(0.3), 
-            intake::getExtended
-        ))
-        .andThen(new StartEndCommand(
+        return new StartEndCommand(
             ()->intake.setVoltage(IntakeConstants.kVoltageIn+Math.abs(linearVelocity.getAsDouble()*2)), 
             ()->intake.stop(),
             intake
-        ));
+        );
     }
 
     /**
@@ -147,7 +135,7 @@ public class Superstructure {
     public Command dumpCargo(){
         return new StartEndCommand(
             ()->{
-                intake.setExtended(true);
+                // intake.setExtended(true);
                 intake.setVoltageOut();
                 indexer.setVoltageOut();
             },
@@ -310,7 +298,7 @@ public class Superstructure {
      * This command must be interrupted and will stop shooting/indexing once interrupted.
      */
     public Command fenderShootHigh(){
-        return setShooterState(ShotMap.find(0)) // closest state (fender)
+        return setShooterState(ShotMap.kFenderHigh) // closest state (fender)
         .alongWith(feedCargo(shooter::withinTolerance));
     }
     /**
@@ -428,16 +416,16 @@ public class Superstructure {
      * Automatically adjust the hood angle based on current odom distance to hub.
      * (This is the shooter default command)
      */
-    public Command autoHood() {
-        return new RunCommand(()->{
-            shooter.setHood(
-                ShotMap.find(
-                    drivetrain.getPose().getTranslation().getDistance(FieldUtil.kFieldCenter)
+    // public Command autoHood() {
+    //     return new RunCommand(()->{
+    //         shooter.setHood(
+    //             ShotMap.find(
+    //                 drivetrain.getPose().getTranslation().getDistance(FieldUtil.kFieldCenter)
                     
-                ).hoodMM
+    //             ).hoodMM
                 
-                //0
-            );
-        }, shooter);
-    }
+    //             //0
+    //         );
+    //     }, shooter);
+    // }
 }

@@ -28,7 +28,7 @@ public class Intake extends SubsystemBase {
 
     private final WPI_TalonFX motor = new WPI_TalonFX(kMotorID);
     
-    private final DoubleSolenoid pistons = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, kPistonExtendPort, kPistonRetractPort);
+    // private final DoubleSolenoid pistons = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, kPistonExtendPort, kPistonRetractPort);
 
     public Intake() {
         setupIntake(true);
@@ -64,12 +64,12 @@ public class Intake extends SubsystemBase {
     public void setVoltageIn(){setVoltage(kVoltageIn);}
     public void setVoltageOut(){setVoltage(kVoltageOut);}
     
-    public void setExtended(boolean extended){
-        DoubleSolenoid.Value value = extended ? Value.kReverse : Value.kForward;
-        pistons.set(value);
-    }
+    // public void setExtended(boolean extended){
+    //     DoubleSolenoid.Value value = extended ? Value.kReverse : Value.kForward;
+    //     pistons.set(value);
+    // }
     
-    public boolean getExtended(){return pistons.get() == Value.kReverse;}
+    // public boolean getExtended(){return pistons.get() == Value.kReverse;}
     
     /**
      * @return RPM of intake wheels

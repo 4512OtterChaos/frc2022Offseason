@@ -11,18 +11,19 @@ import frc.robot.util.FieldUtil;
 public final class ShotMap {
 
     private static final TreeMap<Double, ShotMapEntry> map = new TreeMap<>();
-    public static final Shooter.State kFenderLow = new Shooter.State(1500, 25);
+    public static final Shooter.State kFenderLow = new Shooter.State(1500); // A button
+    public static final Shooter.State kFenderHigh = new Shooter.State(3000); // Y button
     private static double rpmOffset = 0;
     static {
         // high goal states at distance in inches
         map.put(
             // fender high shot
             Units.metersToInches(FieldUtil.kCenterToFenderDist+SwerveConstants.kRobotWidth/2.0),
-            new ShotMapEntry(2900, 0, 1.5)
+            new ShotMapEntry(2900, 1.5)
         );
-        map.put(100.0, new ShotMapEntry(2600, 23, 1.5));
-        map.put(200.0, new ShotMapEntry(3400, 41, 1.75));
-        map.put(300.0, new ShotMapEntry(4800, 53, 2)); 
+        map.put(100.0, new ShotMapEntry(2600, 1.5));
+        map.put(200.0, new ShotMapEntry(3400, 1.75));
+        map.put(300.0, new ShotMapEntry(4800, 2)); 
     }
 
     private static ShotMapEntry findEntry(double distanceMeters){
@@ -36,7 +37,7 @@ public final class ShotMap {
         double closeToTarget = distanceInches - closeDist;
 
         if(closeToFar == 0) return map.get(closeDist);
-        return map.get(closeDist).interpolate(map.get(farDist), closeToTarget / closeToFar).plus(new ShotMapEntry(rpmOffset, 0, 0));
+        return map.get(closeDist).interpolate(map.get(farDist), closeToTarget / closeToFar).plus(new ShotMapEntry(rpmOffset, 0));
     }
     /**
      * Finds shooter state appropriate for shooting into the high goal at the given distance
@@ -67,13 +68,13 @@ public final class ShotMap {
          * estimating cargo speed.
          * @param tof Time-of-flight seconds at given distance
          */
-        public ShotMapEntry(double rpm, double hoodMM, double tof){
-            this.state = new Shooter.State(rpm, hoodMM);
+        public ShotMapEntry(double rpm, double tof){
+            this.state = new Shooter.State(rpm);
             this.tof = tof;
         }
         public ShotMapEntry plus(ShotMapEntry other){
             Shooter.State newState = other.state.plus(state);
-            return new ShotMapEntry(newState.rpm, newState.hoodMM,tof);
+            return new ShotMapEntry(newState.rpm,tof);
         }
 
         @Override
@@ -86,7 +87,6 @@ public final class ShotMap {
                 Shooter.State newState = state.interpolate(endValue.state, t);
                 return new ShotMapEntry(
                     newState.rpm,
-                    newState.hoodMM,
                     MathUtil.interpolate(tof, endValue.tof, t)
                 );
             }

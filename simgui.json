@@ -65,7 +65,8 @@
       "/Shuffleboard/SwerveDrive: Config/yController": "PIDController",
       "/SmartDashboard/Auto Options": "String Chooser",
       "/SmartDashboard/Field": "Field2d",
-      "/SmartDashboard/Field XZ": "Field2d"
+      "/SmartDashboard/Field XZ": "Field2d",
+      "/SmartDashboard/Reset Module Steering to 0": "Command"
     },
     "windows": {
       "/SmartDashboard/Auto Options": {
@@ -161,6 +162,11 @@
         "top": 600,
         "units": "feet",
         "width": 16.459199905395508,
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Reset Module Steering to 0": {
         "window": {
           "visible": true
         }

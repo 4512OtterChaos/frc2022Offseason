@@ -28,16 +28,16 @@ public class Shooter extends SubsystemBase {
     
     private final WPI_TalonFX rightMotor = new WPI_TalonFX(kRightMotorID);
     private final WPI_TalonFX leftMotor = new WPI_TalonFX(kLeftMotorID);
-    private final LinearServo leftServo = new LinearServo(kLeftServoChannel, kServoLengthMM, kServoSpeedMM);
-    private final LinearServo rightServo = new LinearServo(kRightServoChannel, kServoLengthMM, kServoSpeedMM);
+    // private final LinearServo leftServo = new LinearServo(kLeftServoChannel, kServoLengthMM, kServoSpeedMM);
+    // private final LinearServo rightServo = new LinearServo(kRightServoChannel, kServoLengthMM, kServoSpeedMM);
 
     private State targetState = new State();
 
     public Shooter() {
         setupFlywheel(true);
         
-        leftServo.setMaxPos(kServoMaxMM);
-        rightServo.setMaxPos(kServoMaxMM);
+        // leftServo.setMaxPos(kServoMaxMM);
+        // rightServo.setMaxPos(kServoMaxMM);
     }
 
     private void setupFlywheel(boolean init){
@@ -59,8 +59,8 @@ public class Shooter extends SubsystemBase {
     @Override
     public void periodic() {
         // estimate current servo position
-        leftServo.updateCurPos();
-        rightServo.updateCurPos();
+        // leftServo.updateCurPos();
+        // rightServo.updateCurPos();
 
         // check if the motors had an oopsie, reapply settings
         if(rightMotor.hasResetOccurred() || leftMotor.hasResetOccurred()){
@@ -82,10 +82,10 @@ public class Shooter extends SubsystemBase {
             );
         }
     }
-    public void setHood(double extensionMM){
-        leftServo.setPosition(extensionMM);
-        rightServo.setPosition(extensionMM);
-    }
+    // public void setHood(double extensionMM){
+    //     leftServo.setPosition(extensionMM);
+    //     rightServo.setPosition(extensionMM);
+    // }
     public void setShooterVoltage(double volts){
         rightMotor.set(volts/kVoltageSaturation);   
 
@@ -93,7 +93,7 @@ public class Shooter extends SubsystemBase {
     public void setState(State state){
         targetState = state;
         setRPM(state.rpm);
-        setHood(state.hoodMM);
+        // setHood(state.hoodMM);
     }
     public void stop(){
         setState(new State());
@@ -101,8 +101,8 @@ public class Shooter extends SubsystemBase {
 
     public State getState(){
         return new State(
-            TalonUtil.velocityToRotations(rightMotor.getSelectedSensorVelocity(), 1)*60,
-            rightServo.getPosition()
+            TalonUtil.velocityToRotations(rightMotor.getSelectedSensorVelocity(), 1)*60
+            // rightServo.getPosition()
         );
     }
     public State getTargetState(){return targetState;}
@@ -119,7 +119,7 @@ public class Shooter extends SubsystemBase {
             0
         );
         SmartDashboard.putNumber("Shooter/RPM", state.rpm);
-        SmartDashboard.putNumber("Shooter/HoodMM", state.hoodMM);
+        // SmartDashboard.putNumber("Shooter/HoodMM", state.hoodMM);
     }
     
     /**
@@ -128,20 +128,19 @@ public class Shooter extends SubsystemBase {
      */
     public static class State implements Interpolatable<Shooter.State>{
         public final double rpm;
-        public final double hoodMM;
+        // public final double hoodMM;
         
-        public State(double rpm, double hoodMM){
+        public State(double rpm){
             this.rpm = rpm;
-            this.hoodMM = hoodMM;
         }
         public State(){
-            this(0, 0);
+            this(0);
         }
         public State plus(State other){
-            return new State(this.rpm+other.rpm, this.hoodMM+other.hoodMM);
+            return new State(this.rpm+other.rpm);
         }
         public boolean withinTolerance(State other){
-            return Math.abs(other.rpm - rpm) <= kToleranceRPM && Math.abs(other.hoodMM - hoodMM) < kServoToleranceMM;
+            return Math.abs(other.rpm - rpm) <= kToleranceRPM;
         }
         
         @Override
@@ -152,8 +151,8 @@ public class Shooter extends SubsystemBase {
                 return endValue;
             } else {
                 double newRPM = MathUtil.interpolate(rpm, endValue.rpm, t);
-                double newHoodMM = MathUtil.interpolate(hoodMM, endValue.hoodMM, t);
-                return new State(newRPM, newHoodMM);
+                // double newHoodMM = MathUtil.interpolate(hoodMM, endValue.hoodMM, t);
+                return new State(newRPM);
             }
         }
     }

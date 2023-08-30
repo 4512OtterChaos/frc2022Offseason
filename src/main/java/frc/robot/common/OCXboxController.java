@@ -25,7 +25,7 @@ public class OCXboxController extends CommandXboxController {
     public static final double kSpeedMax = 0.8;
     
     private double drivespeed = kSpeedDefault;
-    private static final double kTurnDrivespeed = 0.5;
+    private static final double kTurnDrivespeed = 0.35;
 
     private SlewRateLimiter forwardLimiter = new SlewRateLimiter(1.0 / 0.6); // 1 / x seconds to full
     private SlewRateLimiter strafeLimiter = new SlewRateLimiter(1.0 / 0.6);
