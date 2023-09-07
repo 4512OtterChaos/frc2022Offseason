@@ -4,49 +4,74 @@
 
 package frc.robot;
 
-import com.revrobotics.REVPhysicsSim;
-
+import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
-import edu.wpi.first.wpilibj.simulation.BatterySim;
-import edu.wpi.first.wpilibj.simulation.RoboRioSim;
-import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import static edu.wpi.first.wpilibj2.command.Commands.*;
+
+import com.ctre.phoenixpro.controls.CoastOut;
+import com.ctre.phoenixpro.hardware.TalonFX;
 
 public class Robot extends TimedRobot {
 
-    private RobotContainer container;
+    TalonFX leftMotor = new TalonFX(0);
 
-    private Command autoCommand;
+    TalonFX[] otherMotors = {
+        new TalonFX(1)
+    };
 
-    private Timer disableTimer = new Timer();
+    PowerDistribution pdp = new PowerDistribution();
+
+    DoubleLogEntry supplyVoltageLog;
+    DoubleLogEntry supplyCurrentLog;
+    DoubleLogEntry statorVoltageLog;
+    DoubleLogEntry statorCurrentLog;
+    DoubleLogEntry pdpCurrentLog;
+
+    public Robot() {
+        super(0.01);
+    }
 
     @Override
     public void robotInit() {
-        container = new RobotContainer();
-
         LiveWindow.disableAllTelemetry();
         LiveWindow.setEnabled(false);
+
+        // configure leftMotor
+
+        // configure otherMotors
+        for(var motor : otherMotors) {
+            motor.setControl(new CoastOut());
+        }
+
+        DataLogManager.start();
+        var log = DataLogManager.getLog();
+        supplyVoltageLog = new DoubleLogEntry(log, "supplyVoltage");
+        supplyCurrentLog = new DoubleLogEntry(log, "supplyCurrent");
+        statorVoltageLog = new DoubleLogEntry(log, "statorVoltage");
+        statorCurrentLog = new DoubleLogEntry(log, "statorCurrent");
+        pdpCurrentLog = new DoubleLogEntry(log, "pdpCurrent");
     }
     
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
+
+        pdpCurrentLog.append(pdp.getCurrent(0));
         
-        container.periodic();
-        container.log();
     }
     
     @Override
     public void autonomousInit() {
-        container.setAllBrake(true);
+        brakingTest().schedule();
+    }
 
-        autoCommand = container.getAutoCommand();
-
-        if(autoCommand != null){
-            autoCommand.schedule();
-        }
+    public CommandBase brakingTest() {
+        return sequence();
     }
     
     @Override
@@ -54,12 +79,6 @@ public class Robot extends TimedRobot {
     
     @Override
     public void teleopInit() {
-        container.setAllBrake(true);
-        container.init(false);
-
-        if(autoCommand != null){
-            autoCommand.cancel();
-        }
     }
     
     @Override
@@ -67,38 +86,21 @@ public class Robot extends TimedRobot {
     
     @Override
     public void disabledInit() {
-        disableTimer.reset();
-        disableTimer.start();
-        
-        container.disable();
     }
     
     @Override
     public void disabledPeriodic() {
-        // coast motors in disabled mode so the robot can be moved
-        if(disableTimer.hasElapsed(2)){
-            disableTimer.stop();
-            disableTimer.reset();
-
-            container.setAllBrake(false);
-        }
     }
 
     @Override
     public void simulationInit(){
-        container.simulationInit();
     }
     @Override
     public void simulationPeriodic(){
-        container.simulationPeriodic();
-        // calculate voltage sag due to current draw
-        RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(container.getCurrentDraw()));
     }
     
     @Override
     public void testInit() {
-        container.setAllBrake(true);
-        container.init(true);
     }
     
     @Override
