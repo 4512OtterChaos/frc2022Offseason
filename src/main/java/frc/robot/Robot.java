@@ -13,15 +13,17 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 
+import com.ctre.phoenixpro.configs.TalonFXConfiguration;
 import com.ctre.phoenixpro.controls.CoastOut;
 import com.ctre.phoenixpro.hardware.TalonFX;
+import com.ctre.phoenixpro.signals.NeutralModeValue;
 
 public class Robot extends TimedRobot {
 
-    TalonFX leftMotor = new TalonFX(0);
+    TalonFX leftMotor = new TalonFX(8);
 
     TalonFX[] otherMotors = {
-        new TalonFX(1)
+        new TalonFX(9)
     };
 
     PowerDistribution pdp = new PowerDistribution();
@@ -42,10 +44,21 @@ public class Robot extends TimedRobot {
         LiveWindow.setEnabled(false);
 
         // configure leftMotor
-
+        var config = new TalonFXConfiguration();
+        config.CurrentLimits.StatorCurrentLimit = 60;
+        config.CurrentLimits.StatorCurrentLimitEnable = true;
+        config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        leftMotor.getConfigurator().apply(config);
+        leftMotor.getSupplyVoltage().setUpdateFrequency(200, 0.1);
+        leftMotor.getSupplyCurrent().setUpdateFrequency(200, 0.1);
+        leftMotor.getStatorCurrent().setUpdateFrequency(200, 0.1);
+        leftMotor.getDutyCycle().setUpdateFrequency(200, 0.1);
         // configure otherMotors
         for(var motor : otherMotors) {
             motor.setControl(new CoastOut());
+            config = new TalonFXConfiguration();
+            config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+            motor.getConfigurator().apply(config);
         }
 
         DataLogManager.start();
@@ -61,17 +74,51 @@ public class Robot extends TimedRobot {
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
 
-        pdpCurrentLog.append(pdp.getCurrent(0));
+        statorVoltageLog.append(leftMotor.get()*leftMotor.getSupplyVoltage().getValue());
+        statorCurrentLog.append(leftMotor.getStatorCurrent().getValue());
+        supplyVoltageLog.append(leftMotor.getSupplyVoltage().getValue());
+        supplyCurrentLog.append(leftMotor.getSupplyCurrent().getValue());
+        pdpCurrentLog.append(pdp.getCurrent(2));
         
     }
     
     @Override
     public void autonomousInit() {
-        brakingTest().schedule();
+        // brakingTest().schedule();
+        regenTest().schedule();
     }
 
     public CommandBase brakingTest() {
-        return sequence();
+        return sequence(
+            runOnce(()->leftMotor.set(0.5)),
+            waitSeconds(2),
+            runOnce(()->leftMotor.set(0)),
+            waitSeconds(1.5),
+            runOnce(()->leftMotor.set(0.5)),
+            waitSeconds(2),
+            runOnce(()->leftMotor.set(0.05)),
+            waitSeconds(1.5),
+            runOnce(()->leftMotor.set(0.5)),
+            waitSeconds(2),
+            runOnce(()->leftMotor.set(-0.05)),
+            waitSeconds(1.5),
+            runOnce(()->leftMotor.set(0.5)),
+            waitSeconds(2),
+            runOnce(()->leftMotor.set(-0.5)),
+            waitSeconds(2),
+            runOnce(()->leftMotor.set(0))
+        );
+    }
+
+    public CommandBase regenTest() {
+        return sequence(
+            runOnce(()->leftMotor.set(0)),
+            waitSeconds(6),
+            runOnce(()->leftMotor.set(0.1)),
+            waitSeconds(4),
+            runOnce(()->leftMotor.set(-0.1)),
+            waitSeconds(4)
+        );
     }
     
     @Override
