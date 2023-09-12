@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.datalog.BooleanLogEntry;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.util.datalog.IntegerLogEntry;
@@ -38,6 +40,8 @@ public class Robot extends TimedRobot {
         new TalonFX(7),
     };
 
+    DCMotor motorModel = DCMotor.getFalcon500(1);
+
     PowerDistribution pdp = new PowerDistribution();
 
     StringLogEntry testNameLog;
@@ -54,6 +58,9 @@ public class Robot extends TimedRobot {
     BooleanLogEntry unstableVoltageLog;
 
     DoubleLogEntry counterAppliedVoltageLog;
+
+    DoubleLogEntry simStatorCurrentLog;
+    DoubleLogEntry simSupplyCurrentLog;
 
     public Robot() {
         super(0.01);
@@ -108,6 +115,9 @@ public class Robot extends TimedRobot {
         unstableVoltageLog = new BooleanLogEntry(log, "unstableVoltageFlag");
 
         counterAppliedVoltageLog = new DoubleLogEntry(log, "counterAppliedVoltage");
+
+        simStatorCurrentLog = new DoubleLogEntry(log, "simStatorCurrent");
+        simSupplyCurrentLog = new DoubleLogEntry(log, "simSupplyCurrent");
     }
     
     @Override
@@ -115,23 +125,30 @@ public class Robot extends TimedRobot {
         CommandScheduler.getInstance().run();
 
         double supplyVolts = mainMotor.getSupplyVoltage().getValue();
+        double appliedVolts = mainMotor.get() * supplyVolts;
+        double radsPerSec = Units.rotationsToRadians(mainMotor.getVelocity().getValue());
+
         supplyVoltageLog.append(supplyVolts);
         supplyCurrentLog.append(mainMotor.getSupplyCurrent().getValue());
         pdpCurrentLog.append(pdp.getCurrent(2));
         statorCurrentLog.append(mainMotor.getStatorCurrent().getValue());
         dutyCycleLog.append(mainMotor.get());
-        appliedVoltageLog.append(mainMotor.get() * supplyVolts);
-        velocityLog.append(mainMotor.getVelocity().getValue());
+        appliedVoltageLog.append(appliedVolts);
+        velocityLog.append(Units.radiansPerSecondToRotationsPerMinute(radsPerSec));
         bridgeOutputLog.append(mainMotor.getBridgeOuput().getValue().toString());
         faultFieldLog.append(mainMotor.getFaultField().getValue());
         statorCurrLimitLog.append(mainMotor.getFault_StatorCurrLimit().getValue());
         unstableVoltageLog.append(mainMotor.getFault_UnstableSupplyV().getValue());
 
         counterAppliedVoltageLog.append(counterMotor.getDutyCycle().getValue() * supplyVolts);
+
+        simStatorCurrentLog.append(simStatorCurrent(motorModel, radsPerSec, appliedVolts));
+        simSupplyCurrentLog.append(simSupplyCurrent(motorModel, radsPerSec, appliedVolts, supplyVolts));
     }
     
     @Override
     public void autonomousInit() {
+        // maybe try disabling FOC in duty/voltage request?
         sequence(
             brakingTest(),
             waitSeconds(5),
@@ -265,4 +282,26 @@ public class Robot extends TimedRobot {
     
     @Override
     public void testPeriodic() {}
+
+
+    private static double simStatorCurrent(DCMotor motor, double radiansPerSec, double inputVolts) {
+        double effVolts = inputVolts - radiansPerSec / motor.KvRadPerSecPerVolt;
+        return effVolts / motor.rOhms;
+    }
+
+    /**
+     * Calculates the current drawn from the battery by the motor(s), including back-emf regeneration.
+     * 
+     * @param motor The motor(s) used.
+     * @param radiansPerSec The velocity of the motor in radians per second.
+     * @param inputVolts The voltage commanded by the motor controller (battery voltage * duty cycle).
+     * @param battVolts The voltage of the battery.
+     */
+    private static double simSupplyCurrent(DCMotor motor, double radiansPerSec, double inputVolts, double battVolts) {
+        double backCurr = radiansPerSec / motor.KvRadPerSecPerVolt / motor.rOhms;
+        double inputCurr = inputVolts / motor.rOhms;
+        double statorCurr = (inputCurr - backCurr);
+        double inputCurrRatio = Math.abs(inputCurr / statorCurr);
+        return Math.abs((statorCurr*inputCurrRatio) * (inputVolts / battVolts)) - Math.abs(statorCurr*(1-inputCurrRatio));
+    }
 }
