@@ -1,8 +1,8 @@
 package frc.robot.auto;
 
-import com.pathplanner.lib.PathConstraints;
+// import com.pathplanner.lib.PathConstraints;
 
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
+// import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 
 public class AutoConstants {
@@ -19,24 +19,24 @@ public class AutoConstants {
     public static final double kDThetaController = 0.1;
 
     // constraints for the theta controller on velocity (omega) and acceleration (alpha)
-    public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(
-        Units.rotationsToRadians(1.5),
-        Units.rotationsToRadians(3)
-    );
-    public static final double kThetaPositionTolerance = Units.degreesToRadians(3.5);
-    public static final double kThetaVelocityTolerance = Units.degreesToRadians(10);
+    // public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(
+    //     Units.rotationsToRadians(1.5),
+    //     Units.rotationsToRadians(3)
+    // );
+    // public static final double kThetaPositionTolerance = Units.degreesToRadians(3.5);
+    // public static final double kThetaVelocityTolerance = Units.degreesToRadians(10);
 
-    // packaged configs for path following
-    public static final PathConstraints kFastSpeedConfig = new PathConstraints(
-        Units.feetToMeters(11), 
-        Units.feetToMeters(14)
-    );
-    public static final PathConstraints kMediumSpeedConfig = new PathConstraints(
-        Units.feetToMeters(9), 
-        Units.feetToMeters(11)
-    );
-    public static final PathConstraints kSlowSpeedConfig = new PathConstraints(
-        Units.feetToMeters(6), 
-        Units.feetToMeters(6)
-    );
+    // // packaged configs for path following
+    // public static final PathConstraints kFastSpeedConfig = new PathConstraints(
+    //     Units.feetToMeters(11), 
+    //     Units.feetToMeters(14)
+    // );
+    // public static final PathConstraints kMediumSpeedConfig = new PathConstraints(
+    //     Units.feetToMeters(9), 
+    //     Units.feetToMeters(11)
+    // );
+    // public static final PathConstraints kSlowSpeedConfig = new PathConstraints(
+    //     Units.feetToMeters(6), 
+    //     Units.feetToMeters(6)
+    // );
 }

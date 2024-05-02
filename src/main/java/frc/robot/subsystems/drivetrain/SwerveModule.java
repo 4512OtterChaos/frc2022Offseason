@@ -23,11 +23,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Robot;
 import frc.robot.subsystems.drivetrain.SwerveConstants.Module;
 import frc.robot.util.TalonUtil;
-import io.github.oblarg.oblog.Loggable;
-import io.github.oblarg.oblog.annotations.*;
+// import io.github.oblarg.oblog.Loggable;
+// import io.github.oblarg.oblog.annotations.*;
 
-@Log.Exclude
-public class SwerveModule implements Loggable {
+// @Log.Exclude
+public class SwerveModule{ //implements Loggable {
 
     // Module Constants
     private final Module moduleConstants;
@@ -216,73 +216,73 @@ public class SwerveModule implements Loggable {
         return moduleConstants;
     }
 
-    static class SwerveModulesLog implements Loggable {
-        public final SwerveModule[] modules;
+    // static class SwerveModulesLog implements Loggable {
+    //     public final SwerveModule[] modules;
     
-        public SwerveModulesLog(SwerveModule... modules) {
-            this.modules = modules;
-        }
+    //     public SwerveModulesLog(SwerveModule... modules) {
+    //         this.modules = modules;
+    //     }
     
-        @Config(defaultValueNumeric = SwerveConstants.kDriveKP)
-        public void configDriveKP(double kP) {
-            for(SwerveModule module : modules) {
-                module.driveMotor.config_kP(0, kP);
-            }
-        }
-        @Config(defaultValueNumeric = SwerveConstants.kDriveKI)
-        public void configDriveKI(double kI) {
-            for(SwerveModule module : modules) {
-                module.driveMotor.config_kI(0, kI);
-            }
-        }
-        @Config(defaultValueNumeric = SwerveConstants.kDriveKD)
-        public void configDriveKD(double kD) {
-            for(SwerveModule module : modules) {
-                module.driveMotor.config_kD(0, kD);
-            }
-        }
-        @Config(defaultValueNumeric = SwerveConstants.kSteerKP)
-        public void configSteerKP(double kP) {
-            for(SwerveModule module : modules) {
-                module.steerMotor.config_kP(0, kP);
-            }
-        }
-        @Config(defaultValueNumeric = SwerveConstants.kSteerKI)
-        public void configSteerKI(double kI) {
-            for(SwerveModule module : modules) {
-                module.steerMotor.config_kI(0, kI);
-            }
-        }
-        @Config(defaultValueNumeric = SwerveConstants.kSteerKD)
-        public void configSteerKD(double kD) {
-            for(SwerveModule module : modules) {
-                module.steerMotor.config_kD(0, kD);
-            }
-        }
-        @Config(defaultValueNumeric = SwerveConstants.kSteerVelocity)
-        public void configSteerVelocity(double velocity) {
-            for(SwerveModule module : modules) {
-                module.steerMotor.configMotionCruiseVelocity(
-                    TalonUtil.rotationsToVelocity(velocity, SwerveConstants.kSteerGearRatio)
-                );
-            }
-        }
-        @Config(defaultValueNumeric = SwerveConstants.kSteerAcceleration)
-        public void configSteerAccel(double accel) {
-            for(SwerveModule module : modules) {
-                module.steerMotor.configMotionAcceleration(
-                    TalonUtil.rotationsToVelocity(accel, SwerveConstants.kSteerGearRatio)
-                );
-            }
-        }
-        @Config(defaultValueNumeric = 0.23)
-        public void configSteerFF(double kv) {
-            for(SwerveModule module : modules) {
-                double kFF = kv / 12 * 1023 / TalonUtil.radiansToVelocity(1, 12.8);
-                module.steerMotor.config_kF(0, kFF);
-            }
-        }
-    }
+    //     @Config(defaultValueNumeric = SwerveConstants.kDriveKP)
+    //     public void configDriveKP(double kP) {
+    //         for(SwerveModule module : modules) {
+    //             module.driveMotor.config_kP(0, kP);
+    //         }
+    //     }
+    //     @Config(defaultValueNumeric = SwerveConstants.kDriveKI)
+    //     public void configDriveKI(double kI) {
+    //         for(SwerveModule module : modules) {
+    //             module.driveMotor.config_kI(0, kI);
+    //         }
+    //     }
+    //     @Config(defaultValueNumeric = SwerveConstants.kDriveKD)
+    //     public void configDriveKD(double kD) {
+    //         for(SwerveModule module : modules) {
+    //             module.driveMotor.config_kD(0, kD);
+    //         }
+    //     }
+    //     @Config(defaultValueNumeric = SwerveConstants.kSteerKP)
+    //     public void configSteerKP(double kP) {
+    //         for(SwerveModule module : modules) {
+    //             module.steerMotor.config_kP(0, kP);
+    //         }
+    //     }
+    //     @Config(defaultValueNumeric = SwerveConstants.kSteerKI)
+    //     public void configSteerKI(double kI) {
+    //         for(SwerveModule module : modules) {
+    //             module.steerMotor.config_kI(0, kI);
+    //         }
+    //     }
+    //     @Config(defaultValueNumeric = SwerveConstants.kSteerKD)
+    //     public void configSteerKD(double kD) {
+    //         for(SwerveModule module : modules) {
+    //             module.steerMotor.config_kD(0, kD);
+    //         }
+    //     }
+    //     @Config(defaultValueNumeric = SwerveConstants.kSteerVelocity)
+    //     public void configSteerVelocity(double velocity) {
+    //         for(SwerveModule module : modules) {
+    //             module.steerMotor.configMotionCruiseVelocity(
+    //                 TalonUtil.rotationsToVelocity(velocity, SwerveConstants.kSteerGearRatio)
+    //             );
+    //         }
+    //     }
+    //     @Config(defaultValueNumeric = SwerveConstants.kSteerAcceleration)
+    //     public void configSteerAccel(double accel) {
+    //         for(SwerveModule module : modules) {
+    //             module.steerMotor.configMotionAcceleration(
+    //                 TalonUtil.rotationsToVelocity(accel, SwerveConstants.kSteerGearRatio)
+    //             );
+    //         }
+    //     }
+    //     @Config(defaultValueNumeric = 0.23)
+    //     public void configSteerFF(double kv) {
+    //         for(SwerveModule module : modules) {
+    //             double kFF = kv / 12 * 1023 / TalonUtil.radiansToVelocity(1, 12.8);
+    //             module.steerMotor.config_kF(0, kFF);
+    //         }
+    //     }
+    // }
 
     public void log(){
         // SwerveModuleState state = getAbsoluteState();

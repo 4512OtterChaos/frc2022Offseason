@@ -11,55 +11,55 @@ import frc.robot.subsystems.drivetrain.SwerveDrive;
 
 public class TeleopDriveAngle extends CommandBase {
     
-    private final OCXboxController controller;
-    private final SwerveDrive drivetrain;
+    // private final OCXboxController controller;
+    // private final SwerveDrive drivetrain;
 
-    // magnitude of minimum angle joystick command
-    private final double kAngleMagnitudeDeadband = 0.12;
-    private Rotation2d lastTargetRotation = new Rotation2d();
+    // // magnitude of minimum angle joystick command
+    // private final double kAngleMagnitudeDeadband = 0.12;
+    // private Rotation2d lastTargetRotation = new Rotation2d();
 
-    public TeleopDriveAngle(OCXboxController controller, SwerveDrive drivetrain) {
-        this.controller = controller;
-        this.drivetrain = drivetrain;
+    // public TeleopDriveAngle(OCXboxController controller, SwerveDrive drivetrain) {
+    //     this.controller = controller;
+    //     this.drivetrain = drivetrain;
 
-        addRequirements(drivetrain);
-    }
+    //     addRequirements(drivetrain);
+    // }
     
-    @Override
-    public void initialize() {
-        controller.resetLimiters();
-        drivetrain.resetPathController(); // reset theta profile
-        lastTargetRotation = drivetrain.getHeading();
-    }
+    // @Override
+    // public void initialize() {
+    //     controller.resetLimiters();
+    //     drivetrain.resetPathController(); // reset theta profile
+    //     lastTargetRotation = drivetrain.getHeading();
+    // }
     
-    @Override
-    public void execute() {
-        // convert joysticks to field-axes
-        double xAxis = controller.getRightY();
-        double yAxis = controller.getRightX();
-        Rotation2d targetRotation = new Rotation2d(xAxis, yAxis);
-        // deadband input
-        double magnitude = Math.hypot(xAxis, yAxis);
-        if(magnitude < kAngleMagnitudeDeadband){
-            targetRotation = lastTargetRotation;
-        }
-        else{
-            lastTargetRotation = targetRotation;
-        }
+    // @Override
+    // public void execute() {
+    //     // convert joysticks to field-axes
+    //     double xAxis = controller.getRightY();
+    //     double yAxis = controller.getRightX();
+    //     Rotation2d targetRotation = new Rotation2d(xAxis, yAxis);
+    //     // deadband input
+    //     double magnitude = Math.hypot(xAxis, yAxis);
+    //     if(magnitude < kAngleMagnitudeDeadband){
+    //         targetRotation = lastTargetRotation;
+    //     }
+    //     else{
+    //         lastTargetRotation = targetRotation;
+    //     }
 
-        drivetrain.drive(
-            controller.getForward() * drivetrain.getMaxLinearVelocityMeters(),
-            controller.getStrafe() * drivetrain.getMaxLinearVelocityMeters(),
-            targetRotation,
-            true // this may cause inconsistent angle accuracy versus autonomous
-        );
-    }
+    //     drivetrain.drive(
+    //         controller.getForward() * drivetrain.getMaxLinearVelocityMeters(),
+    //         controller.getStrafe() * drivetrain.getMaxLinearVelocityMeters(),
+    //         targetRotation,
+    //         true // this may cause inconsistent angle accuracy versus autonomous
+    //     );
+    // }
     
-    @Override
-    public void end(boolean interrupted) {}
+    // @Override
+    // public void end(boolean interrupted) {}
     
-    @Override
-    public boolean isFinished() {
-        return false;
-    }
+    // @Override
+    // public boolean isFinished() {
+    //     return false;
+    // }
 }

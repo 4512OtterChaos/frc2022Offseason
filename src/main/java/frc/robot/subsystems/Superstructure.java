@@ -339,53 +339,53 @@ public class Superstructure {
      * the target angle should be updated and also when the indexer is ready to feed(in addition
      * to shooter/drive tolerance).
      */
-    public Command autoShoot(
-            DoubleSupplier vxMeters, DoubleSupplier vyMeters, boolean openLoop,
-            Translation2d targetTranslation,
-            BooleanSupplier targetingCondition
-        ){
-        return new FunctionalCommand(
-            ()->{
-                drivetrain.resetPathController();
-            }, 
-            ()->{
-                boolean targetingReady = targetingCondition.getAsBoolean();
-                //shooter setState to odometry distance
-                Translation2d driveTranslation = drivetrain.getPose().getTranslation();
-                Translation2d translationToTarget = targetTranslation.minus(driveTranslation);
-                double distance = translationToTarget.getNorm();
+    // public Command autoShoot(
+    //         DoubleSupplier vxMeters, DoubleSupplier vyMeters, boolean openLoop,
+    //         Translation2d targetTranslation,
+    //         BooleanSupplier targetingCondition
+    //     ){
+    //     return new FunctionalCommand(
+    //         ()->{
+    //             drivetrain.resetPathController();
+    //         }, 
+    //         ()->{
+    //             boolean targetingReady = targetingCondition.getAsBoolean();
+    //             //shooter setState to odometry distance
+    //             Translation2d driveTranslation = drivetrain.getPose().getTranslation();
+    //             Translation2d translationToTarget = targetTranslation.minus(driveTranslation);
+    //             double distance = translationToTarget.getNorm();
 
-                Shooter.State targetShooterState = ShotMap.find(distance);
-                shooter.setState(targetShooterState);
-                //Drivetrain heading target to hub
-                Rotation2d angleToTarget = drivetrain.getHeading();
-                if(targetingReady){
-                    angleToTarget = new Rotation2d(translationToTarget.getX(), translationToTarget.getY())
-                        .plus(new Rotation2d(Math.PI));
-                }
-                boolean driveAtGoal = drivetrain.drive(
-                    vxMeters.getAsDouble(),
-                    vyMeters.getAsDouble(),
-                    angleToTarget,
-                    openLoop
-                );
-                //Indexer feed when shooter && drivetrain ready
-                if(driveAtGoal && shooter.withinTolerance() && targetingReady){
-                    indexer.setVoltageFeed();
-                }
-                else{
-                    indexer.stop();
-                }
-            }, 
-            (interrupted)->{
-                shooter.stop();
-                indexer.stop();
-                drivetrain.stop();
-            },
-            ()->false,
-            drivetrain, shooter, indexer
-        );
-    }
+    //             Shooter.State targetShooterState = ShotMap.find(distance);
+    //             shooter.setState(targetShooterState);
+    //             //Drivetrain heading target to hub
+    //             Rotation2d angleToTarget = drivetrain.getHeading();
+    //             if(targetingReady){
+    //                 angleToTarget = new Rotation2d(translationToTarget.getX(), translationToTarget.getY())
+    //                     .plus(new Rotation2d(Math.PI));
+    //             }
+    //             boolean driveAtGoal = drivetrain.drive(
+    //                 vxMeters.getAsDouble(),
+    //                 vyMeters.getAsDouble(),
+    //                 angleToTarget,
+    //                 openLoop
+    //             );
+    //             //Indexer feed when shooter && drivetrain ready
+    //             if(driveAtGoal && shooter.withinTolerance() && targetingReady){
+    //                 indexer.setVoltageFeed();
+    //             }
+    //             else{
+    //                 indexer.stop();
+    //             }
+    //         }, 
+    //         (interrupted)->{
+    //             shooter.stop();
+    //             indexer.stop();
+    //             drivetrain.stop();
+    //         },
+    //         ()->false,
+    //         drivetrain, shooter, indexer
+    //     );
+    // }
     /**
      * Automatically aims and fires at the high goal (odometry must be correct!).
      * The velocity suppliers allow translation while aiming/firing.
@@ -397,20 +397,20 @@ public class Superstructure {
      * @param readyCondition Any boolean condition in addition to drivetrain angle
      * and shooter state tolerance to decide when to begin feeding the indexer
      */
-    public Command autoShoot(
-            DoubleSupplier vxMeters, DoubleSupplier vyMeters, boolean openLoop
-        ){
-        return autoShoot(vxMeters, vyMeters, openLoop, FieldUtil.kFieldCenter, ()->true);
-    }
+    // public Command autoShoot(
+    //         DoubleSupplier vxMeters, DoubleSupplier vyMeters, boolean openLoop
+    //     ){
+    //     return autoShoot(vxMeters, vyMeters, openLoop, FieldUtil.kFieldCenter, ()->true);
+    // }
     /**
      * Automatically aims in place and fires at the high goal (odometry must be correct!).
      * This overload is intended for autonomous fire-in-place and uses closed-loop control.
      * This command will end after timeout seconds and stop the drivebase/indexer/shooter.
      */
-    public Command autoShoot(double timeout){
-        return autoShoot(()->0, ()->0, false)
-            .withTimeout(timeout);
-    }
+    // public Command autoShoot(double timeout){
+    //     return autoShoot(()->0, ()->0, false)
+    //         .withTimeout(timeout);
+    // }
 
     /**
      * Automatically adjust the hood angle based on current odom distance to hub.

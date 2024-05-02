@@ -26,12 +26,12 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.auto.AutoConstants;
-import frc.robot.subsystems.drivetrain.SwerveModule.SwerveModulesLog;
-import io.github.oblarg.oblog.Loggable;
-import io.github.oblarg.oblog.annotations.*;
+// import frc.robot.subsystems.drivetrain.SwerveModule.SwerveModulesLog;
+// import io.github.oblarg.oblog.Loggable;
+// import io.github.oblarg.oblog.annotations.*;
 
-@Log.Exclude
-public class SwerveDrive extends SubsystemBase implements Loggable {
+// @Log.Exclude
+public class SwerveDrive extends SubsystemBase{ //implements Loggable {
 
     // construct our modules in order with their specific constants
     private final SwerveModule[] swerveMods = {
@@ -42,7 +42,7 @@ public class SwerveDrive extends SubsystemBase implements Loggable {
     };
 
     // auto-config
-    private final SwerveModulesLog logModules = new SwerveModulesLog(swerveMods);
+    // private final SwerveModulesLog logModules = new SwerveModulesLog(swerveMods);
 
     private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
         swerveMods[0].getModuleConstants().centerOffset,
@@ -59,16 +59,16 @@ public class SwerveDrive extends SubsystemBase implements Loggable {
 
     // path controller and its dimension-specific controllers
     // i.e 1 meter error in the x direction = kP meters per second x velocity added
-    @Config.PIDController
+    // @Config.PIDController
     private final PIDController xController = new PIDController(AutoConstants.kPXController, 0, 0);
-    @Config.PIDController
+    // @Config.PIDController
     private final PIDController yController = new PIDController(AutoConstants.kPYController, 0, 0);
     // our auto rotation targets are profiled to obey velocity and acceleration constraints
-    @Config.PIDController
-    private final ProfiledPIDController thetaController = new ProfiledPIDController(
-        AutoConstants.kPThetaController, 0, AutoConstants.kDThetaController,
-        AutoConstants.kThetaControllerConstraints
-    );
+    // @Config.PIDController
+    // private final ProfiledPIDController thetaController = new ProfiledPIDController(
+    //     AutoConstants.kPThetaController, 0, AutoConstants.kDThetaController,
+    //     AutoConstants.kThetaControllerConstraints
+    // );
 
     private Trajectory logTrajectory;
     
@@ -78,8 +78,8 @@ public class SwerveDrive extends SubsystemBase implements Loggable {
         
         zeroGyro();
         
-        thetaController.enableContinuousInput(-Math.PI, Math.PI);
-        thetaController.setTolerance(kThetaPositionTolerance, kThetaVelocityTolerance);
+        // thetaController.enableContinuousInput(-Math.PI, Math.PI);
+        // thetaController.setTolerance(kThetaPositionTolerance, kThetaVelocityTolerance);
 
         poseEstimator = new SwerveDrivePoseEstimator(
             kinematics,
@@ -134,23 +134,23 @@ public class SwerveDrive extends SubsystemBase implements Loggable {
      * @param openLoop If swerve modules should not use velocity PID
      * @return If the drivetrain rotation is within tolerance of the target rotation
      */
-    public boolean drive(double vxMeters, double vyMeters, Rotation2d targetRotation, boolean openLoop){
-        // rotation speed
-        double rotationRadians = getPose().getRotation().getRadians();
-        double thetaFeedback = thetaController.calculate(rotationRadians, targetRotation.getRadians());
-        double thetaFF = thetaController.getSetpoint().velocity;
+    // public boolean drive(double vxMeters, double vyMeters, Rotation2d targetRotation, boolean openLoop){
+    //     // rotation speed
+    //     double rotationRadians = getPose().getRotation().getRadians();
+    //     double thetaFeedback = thetaController.calculate(rotationRadians, targetRotation.getRadians());
+    //     double thetaFF = thetaController.getSetpoint().velocity;
 
-        // + translation speed
-        ChassisSpeeds targetChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-            vxMeters,
-            vyMeters,
-            thetaFF + thetaFeedback,
-            getHeading()
-        );
+    //     // + translation speed
+    //     ChassisSpeeds targetChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+    //         vxMeters,
+    //         vyMeters,
+    //         thetaFF + thetaFeedback,
+    //         getHeading()
+    //     );
 
-        setChassisSpeeds(targetChassisSpeeds, openLoop, false);
-        return thetaController.atGoal();
-    }
+    //     setChassisSpeeds(targetChassisSpeeds, openLoop, false);
+    //     return thetaController.atGoal();
+    // }
 
     /**
      * Command the swerve modules to the desired states.
@@ -203,7 +203,7 @@ public class SwerveDrive extends SubsystemBase implements Loggable {
     public void resetPathController(){
         xController.reset();
         yController.reset();
-        thetaController.reset(getHeading().getRadians(), getChassisSpeeds().omegaRadiansPerSecond);
+        // thetaController.reset(getHeading().getRadians(), getChassisSpeeds().omegaRadiansPerSecond);
     }
 
     public boolean getIsFieldRelative() {return isFieldRelative;}
@@ -294,12 +294,12 @@ public class SwerveDrive extends SubsystemBase implements Loggable {
     public PIDController getYController() {
         return yController;
     }
-    public PIDController getRotController() {
-        return new PIDController(thetaController.getP(), thetaController.getI(), thetaController.getD());
-    }
-    public ProfiledPIDController getProfiledRotController() {
-        return thetaController;
-    }
+    // public PIDController getRotController() {
+    //     return new PIDController(thetaController.getP(), thetaController.getI(), thetaController.getD());
+    // }
+    // public ProfiledPIDController getProfiledRotController() {
+    //     return thetaController;
+    // }
 
     public void log(){
         Pose2d pose = getPose();
@@ -307,7 +307,7 @@ public class SwerveDrive extends SubsystemBase implements Loggable {
         SmartDashboard.putNumber("Drive/X", pose.getX());
         SmartDashboard.putNumber("Drive/Y", pose.getY());
         ChassisSpeeds chassisSpeeds = getChassisSpeeds();
-        SmartDashboard.putNumber("Drive/Target Heading", Math.toDegrees(thetaController.getSetpoint().position));
+        // SmartDashboard.putNumber("Drive/Target Heading", Math.toDegrees(thetaController.getSetpoint().position));
         SmartDashboard.putNumber("Drive/VX", chassisSpeeds.vxMetersPerSecond);
         SmartDashboard.putNumber("Drive/VY", chassisSpeeds.vyMetersPerSecond);
         SmartDashboard.putNumber("Drive/Omega Degrees", Units.radiansToDegrees(chassisSpeeds.omegaRadiansPerSecond));

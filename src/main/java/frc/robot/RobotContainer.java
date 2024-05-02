@@ -33,11 +33,11 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShotMap;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.util.FieldUtil;
-import io.github.oblarg.oblog.Logger;
-import io.github.oblarg.oblog.annotations.*;
+// import io.github.oblarg.oblog.Logger;
+// import io.github.oblarg.oblog.annotations.*;
 
 public class RobotContainer {
-    @Log.Include
+    // @Log.Include
     private final SwerveDrive drivetrain = new SwerveDrive();
     private final Indexer indexer = new Indexer();
     private final Intake intake = new Intake();
@@ -62,9 +62,9 @@ public class RobotContainer {
         LiveWindow.disableAllTelemetry();
         SmartDashboard.putNumber("Shooter/RPM Offset", 0);
 
-        Logger.configureLogging(this);
+        // Logger.configureLogging(this);
         // uncomment this line for tuning mode
-        Logger.configureConfig(this);
+        // Logger.configureConfig(this);
         drivetrain.resetMotorEncoders();
         SmartDashboard.putData("Reset Module Steering to 0", runOnce(()->{ drivetrain.resetMotorEncoders();}, drivetrain));
     }
@@ -282,7 +282,16 @@ public class RobotContainer {
 
     // Manual shot tuning
     private void configureTestBinds(OCXboxController controller){
-        drivetrain.setDefaultCommand(new TeleopDriveAngle(controller, drivetrain));
+        drivetrain.setDefaultCommand(
+            run(()->drivetrain.drive(
+                        controller.getForward()*drivetrain.getMaxLinearVelocityMeters(),
+                        controller.getStrafe()*drivetrain.getMaxLinearVelocityMeters(),
+                        controller.getTurn()*drivetrain.getMaxAngularVelocityRadians(),
+                        true
+                    ),
+                drivetrain
+            )
+        );
 
         // toggle between field-relative and robot-relative control
         controller.back().onTrue(runOnce(()->{
@@ -331,7 +340,7 @@ public class RobotContainer {
     }
 
     public void log(){
-        Logger.updateEntries();
+        // Logger.updateEntries();
         drivetrain.log();
         intake.log();
         indexer.log();
