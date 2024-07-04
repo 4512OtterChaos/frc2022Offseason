@@ -8,9 +8,12 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.AddressableLED;
+import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -24,9 +27,10 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.common.OCXboxController;
 // import frc.robot.simulation.CargoSim;
 import frc.robot.subsystems.Superstructure;
-import frc.robot.subsystems.drivetrain.SwerveDrive;
-import frc.robot.subsystems.drivetrain.commands.TeleopDriveAngle;
-import frc.robot.subsystems.drivetrain.commands.TeleopDriveBasic;
+import frc.robot.subsystems.drivetrain.Drivetrain;
+import frc.robot.subsystems.drivetrain.Swerve.SwerveDrive;
+import frc.robot.subsystems.drivetrain.Swerve.commands.TeleopDriveAngle;
+import frc.robot.subsystems.drivetrain.Swerve.commands.TeleopDriveBasic;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
@@ -35,10 +39,14 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.util.FieldUtil;
 // import io.github.oblarg.oblog.Logger;
 // import io.github.oblarg.oblog.annotations.*;
+import frc.robot.util.MathHelp;
 
 public class RobotContainer {
     // @Log.Include
-    private final SwerveDrive drivetrain = new SwerveDrive();
+    AddressableLED led = new AddressableLED(9);
+    AddressableLEDBuffer buffer = new AddressableLEDBuffer(2000);
+
+    private final Drivetrain drivetrain = new Drivetrain();
     private final Indexer indexer = new Indexer();
     private final Intake intake = new Intake();
     private final Shooter shooter = new Shooter();
@@ -46,7 +54,7 @@ public class RobotContainer {
     private final Superstructure superstructure = new Superstructure(drivetrain, indexer, intake, shooter);
 
     private OCXboxController driver = new OCXboxController(0);
-    private OCXboxController operator = new OCXboxController(1);
+    private OCXboxController operator = new OCXboxController(0);
     // private final Compressor compressor = new Compressor(PneumaticsModuleType.CTREPCM);
 
     // private final AutoOptions autoOptions = new AutoOptions(drivetrain, indexer, intake, shooter, superstructure);
@@ -65,11 +73,14 @@ public class RobotContainer {
         // Logger.configureLogging(this);
         // uncomment this line for tuning mode
         // Logger.configureConfig(this);
-        drivetrain.resetMotorEncoders();
-        SmartDashboard.putData("Reset Module Steering to 0", runOnce(()->{ drivetrain.resetMotorEncoders();}, drivetrain));
+        
+        led.setLength(buffer.getLength());
+        led.setData(buffer);
+        led.start();
     }
 
     public void periodic(){
+        displayLED();
         superstructure.periodic();
         ShotMap.setRPMOffset(SmartDashboard.getNumber("Shooter/RPM Offset", 0));
     }
@@ -90,7 +101,7 @@ public class RobotContainer {
         // dynamically change binds between modes
         if(!testMode) {
             driver = new OCXboxController(0);
-            operator = new OCXboxController(1);
+            operator = new OCXboxController(0);
             configureDriverBinds(driver);
             configureOperatorBinds(driver);
             // configureOperatorBinds(operator);
@@ -98,12 +109,11 @@ public class RobotContainer {
         else {
             driver = new OCXboxController(0);
             operator = new OCXboxController(1);
-            configureTestBinds(driver);
+            // configureTestBinds(driver);
         }
     }
 
     public void setAllBrake(boolean is){
-        drivetrain.setBrakeOn(is);
         intake.setBrakeOn(is);
         indexer.setBrakeOn(is);
     }
@@ -123,30 +133,15 @@ public class RobotContainer {
     private void configureDriverBinds(OCXboxController controller) {
         // when no other command is using the drivetrain, we
         // pass the joysticks for forward, strafe, and angular position control
-        drivetrain.setDefaultCommand(new TeleopDriveBasic(controller, drivetrain));
-        // drivetrain.setDefaultCommand(new TeleopDriveAngle(controller, drivetrain));
+        drivetrain.setDefaultCommand(run(() -> {
+            drivetrain.arcadeDrive(controller.getForward(), controller.getTurn());
+        }, drivetrain));        // drivetrain.setDefaultCommand(new TeleopDriveAngle(controller, drivetrain));
 
         // push-to-change driving "speed"
         controller.rightBumper()
             .onTrue(runOnce(()->controller.setDriveSpeed(OCXboxController.kSpeedMax)))
             .onFalse(runOnce(()->controller.setDriveSpeed(OCXboxController.kSpeedDefault)));
 
-        // toggle between field-relative and robot-relative control
-        controller.back().onTrue(runOnce(()->{
-            drivetrain.setIsFieldRelative(!drivetrain.getIsFieldRelative());
-        }));
-
-        // reset the robot heading to 0
-        controller.start().onTrue(runOnce(()->{
-            drivetrain.resetOdometry(
-                new Pose2d(
-                    drivetrain.getPose().getTranslation(),
-                    new Rotation2d()
-                )
-            );
-        }));
-
-        
     }
     private void configureOperatorBinds(OCXboxController controller) {
 
@@ -281,67 +276,52 @@ public class RobotContainer {
     }
 
     // Manual shot tuning
-    private void configureTestBinds(OCXboxController controller){
-        drivetrain.setDefaultCommand(
-            run(()->drivetrain.drive(
-                        controller.getForward()*drivetrain.getMaxLinearVelocityMeters(),
-                        controller.getStrafe()*drivetrain.getMaxLinearVelocityMeters(),
-                        controller.getTurn()*drivetrain.getMaxAngularVelocityRadians(),
-                        true
-                    ),
-                drivetrain
-            )
-        );
+    // private void configureTestBinds(OCXboxController controller){
+    //     drivetrain.setDefaultCommand(
+    //         run(()->drivetrain.drive(
+    //                     controller.getForward()*drivetrain.getMaxLinearVelocityMeters(),
+    //                     controller.getStrafe()*drivetrain.getMaxLinearVelocityMeters(),
+    //                     controller.getTurn()*drivetrain.getMaxAngularVelocityRadians(),
+    //                     true
+    //                 ),
+    //             drivetrain
+    //         )
+    //     );
+    //     //Clear intake and indexer
+    //     controller.leftStick()
+    //         .onTrue(runOnce(()->{
+    //             intake.setVoltageOut();
+    //             indexer.setVoltageOut();
+    //         }, intake, indexer))
+    //         .onFalse(runOnce(()->{
+    //             intake.stop();
+    //             indexer.stop();
+    //         }, intake, indexer));
 
-        // toggle between field-relative and robot-relative control
-        controller.back().onTrue(runOnce(()->{
-            drivetrain.setIsFieldRelative(!drivetrain.getIsFieldRelative());
-        }));
+    //     shooter.setDefaultCommand(new RunCommand(()->{
+    //         // shooter.setHood(SmartDashboard.getNumber("Hood MM", 0));
+    //         shooter.setRPM(SmartDashboard.getNumber("Shooter Rpm", 0));
 
-        // reset the robot heading to 0
-        controller.start().onTrue(runOnce(()->{
-            drivetrain.resetOdometry(
-                new Pose2d(
-                    drivetrain.getPose().getTranslation(),
-                    new Rotation2d()
-                )
-            );
-        }));
-        //Clear intake and indexer
-        controller.leftStick()
-            .onTrue(runOnce(()->{
-                intake.setVoltageOut();
-                indexer.setVoltageOut();
-            }, intake, indexer))
-            .onFalse(runOnce(()->{
-                intake.stop();
-                indexer.stop();
-            }, intake, indexer));
+    //         //shooter.setShooterVoltage(controller.getLeftTriggerAxis()*12);
+    //     }, shooter));
 
-        shooter.setDefaultCommand(new RunCommand(()->{
-            // shooter.setHood(SmartDashboard.getNumber("Hood MM", 0));
-            shooter.setRPM(SmartDashboard.getNumber("Shooter Rpm", 0));
+    //     // intake and automatically index cargo, rumble based on status
+    //     controller.rightTrigger(0.25)
+    //         .onTrue(
+    //             superstructure.intakeIndexCargo()
+    //         )
+    //         .onFalse(
+    //             superstructure.stopIntake()
+    //         );
 
-            //shooter.setShooterVoltage(controller.getLeftTriggerAxis()*12);
-        }, shooter));
-
-        // intake and automatically index cargo, rumble based on status
-        controller.rightTrigger(0.25)
-            .onTrue(
-                superstructure.intakeIndexCargo()
-            )
-            .onFalse(
-                superstructure.stopIntake()
-            );
-
-        controller.rightTrigger(0.25)
-            .onTrue(runOnce(()->indexer.setVoltageFeed(), indexer))
-            .onFalse(runOnce(()->indexer.stop(), indexer));
-    }
+    //     controller.rightTrigger(0.25)
+    //         .onTrue(runOnce(()->indexer.setVoltageFeed(), indexer))
+    //         .onFalse(runOnce(()->indexer.stop(), indexer));
+    // }
 
     public void log(){
         // Logger.updateEntries();
-        drivetrain.log();
+        // drivetrain.log();
         intake.log();
         indexer.log();
         shooter.log();
@@ -349,7 +329,7 @@ public class RobotContainer {
         
         // SmartDashboard.putBoolean("Comp/Switch", compressor.getPressureSwitchValue());
 
-        field.setRobotPose(drivetrain.getPose());
+        // field.setRobotPose(drivetrain.getPose());
         // field.getObject("vision pose").setPose(new Pose2d(
         //     FieldUtil.kFieldCenter.minus(vision.getRobotToTargetTranslation().rotateBy(drivetrain.getHeading())),
         //     new Rotation2d()
@@ -359,16 +339,16 @@ public class RobotContainer {
         //     new Transform2d(vision.getRobotToTargetTranslation(), new Rotation2d())
         // ));
         
-        field.getObject("Swerve Modules").setPoses(drivetrain.getModulePoses());
-        Trajectory logTrajectory = drivetrain.getLogTrajectory();
-        if(logTrajectory == null) logTrajectory = new Trajectory();
-        field.getObject("Trajectory").setTrajectory(logTrajectory);
+        // field.getObject("Swerve Modules").setPoses(drivetrain.getModulePoses());
+        // Trajectory logTrajectory = drivetrain.getLogTrajectory();
+        // if(logTrajectory == null) logTrajectory = new Trajectory();
+        // field.getObject("Trajectory").setTrajectory(logTrajectory);
 
-        Translation2d driveTranslation = drivetrain.getPose().getTranslation();
-        SmartDashboard.putNumber(
-            "Shooter/DistanceInches",
-            Units.metersToInches(driveTranslation.getDistance(FieldUtil.kFieldCenter))
-        );
+        // Translation2d driveTranslation = drivetrain.getPose().getTranslation();
+        // SmartDashboard.putNumber(
+        //     "Shooter/DistanceInches",
+        //     Units.metersToInches(driveTranslation.getDistance(FieldUtil.kFieldCenter))
+        // );
 
         if(!DriverStation.isFMSAttached()) NetworkTableInstance.getDefault().flush();
     }
@@ -396,12 +376,35 @@ public class RobotContainer {
         // cargoSimulation.update();
     }
 
-    public double getCurrentDraw(){
+    public double getCurrentDraw(){ //doesn't include drivetrain
         double sum = 0;
-        sum += drivetrain.getCurrentDraw();
+        // sum += drivetrain.getCurrentDraw();
         sum += shooter.getCurrentDraw();
         sum += indexer.getCurrentDraw();
         sum += intake.getCurrentDraw();
         return sum;
+    }
+
+    // public void displayLED() {
+    //     double actualPercent = 100;
+    //     int actualIndex = Math.abs((int)(buffer.getLength()*actualPercent));
+    //     for(int i = 0; i<Math.abs(buffer.getLength()); i++){
+    //         double seconds = Timer.getFPGATimestamp();
+    //         if(i < actualIndex)buffer.setHSV(i, (35/2+i+(int)(seconds*350)) % 180, (int)(.98*255), (int)(.70*255));
+    //         else buffer.setHSV(i,0,0,0);
+
+    //     }
+    //     led.setData(buffer);
+    
+    
+    // }
+
+    public void displayLED() {
+        for(int i = 0; i<Math.abs(buffer.getLength()); i++){
+            buffer.setHSV(i, 0, 255, 255);
+        }
+        led.setData(buffer);
+    
+    
     }
 }

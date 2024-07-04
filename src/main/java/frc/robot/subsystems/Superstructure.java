@@ -21,7 +21,8 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.common.OCXboxController;
-import frc.robot.subsystems.drivetrain.SwerveDrive;
+import frc.robot.subsystems.drivetrain.Drivetrain;
+import frc.robot.subsystems.drivetrain.Swerve.SwerveDrive;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeConstants;
@@ -32,7 +33,7 @@ import frc.robot.util.FieldUtil;
 
 public class Superstructure {
 
-    private final SwerveDrive drivetrain;
+    private final Drivetrain  drivetrain;
     private final Indexer indexer;
     private final Intake intake;
     private final Shooter shooter;
@@ -40,7 +41,7 @@ public class Superstructure {
 
     private int cargoStored = 0;
 
-    public Superstructure(SwerveDrive drivetrain, Indexer indexer, Intake intake, Shooter shooter) {
+    public Superstructure(Drivetrain drivetrain, Indexer indexer, Intake intake, Shooter shooter) {
         this.drivetrain = drivetrain;
         this.indexer = indexer;
         this.intake = intake;

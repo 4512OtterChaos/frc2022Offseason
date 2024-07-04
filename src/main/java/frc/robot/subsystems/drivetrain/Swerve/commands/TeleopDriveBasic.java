@@ -2,11 +2,11 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems.drivetrain.commands;
+package frc.robot.subsystems.drivetrain.Swerve.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.common.OCXboxController;
-import frc.robot.subsystems.drivetrain.SwerveDrive;
+import frc.robot.subsystems.drivetrain.Swerve.SwerveDrive;
 
 /**
  * Basic tele-op velocity control using a controller.

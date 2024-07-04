@@ -20,7 +20,7 @@ public class OCXboxController extends CommandXboxController {
 
     private static final double kDeadband = 0.12;
 
-    public static final double kSpeedDefault = .55;
+    public static final double kSpeedDefault = .3;
     public static final double kSpeedFast = 0.65;
     public static final double kSpeedMax = 0.8;
     

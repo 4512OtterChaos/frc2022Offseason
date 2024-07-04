@@ -12,7 +12,7 @@ package frc.robot.auto;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.subsystems.drivetrain.SwerveDrive;
+import frc.robot.subsystems.drivetrain.Swerve.SwerveDrive;
 
 public class OCSwerveFollower extends CommandBase {
     
